@@ -66,15 +66,11 @@ describe("Profile processing", function(){
 			
 			singleRegex = "/^field\d+*/";
 			multiRegex = ["/^field\d+*/", "/^vaule\d+$/"];
-		});		
-
-
-		profile = {};
 			
 			spyOn(String.prototype, 'test').and.callThrough();
 		});
 		
-		if("profile is returned with required after process", function () {
+		it("profile is returned with required after process", function () {
 			var _profile;
 			
 			profile.require_regex = singleRegex;
@@ -103,7 +99,7 @@ describe("Profile processing", function(){
 		});
 		
 		describe("is supplied a single regex string", function () {
-			it("it calls String.match once for each key in the data", function () {
+			it("it calls String.test once for each key in the data", function () {
 				var _profile;
 			
 				profile.require_regex = singleRegex;
@@ -123,7 +119,7 @@ describe("Profile processing", function(){
 		});
 		
 		describe("is supplied a mutiple regexs", function () {
-			it("it calls String.match for each require_regex and data key combonation", function () {
+			it("it calls String.test for each require_regex and data key combonation", function () {
 				var _profile;
 			
 				profile.require_regex = multiRegex;
@@ -142,11 +138,104 @@ describe("Profile processing", function(){
 			});
 		});
 		
+		it("moves optional fields to requried when the field matches a regex", function () {
+			var _profile;
+			profile.optional = [ "field1" ];
+			profile.require_regex = singleRegex;
+			_profile = processRequiredRegex(profile, data);
+			
+			expect(_profile.required.length).toBe(0);
+		})
+		
 	});
 	
 	describe("of optional_regexp", function() {
-		pending();
+		beforeEach(function () {
+
+			profile = {};
+			data = {
+				"field1" : "a",
+				"field2" : ["c","d"],
+				"radio1" : "e",
+				"radio2" : "f",
+				"value1" : ""
+			};
+			
+			singleRegex = "/^field\d+*/";
+			multiRegex = ["/^field\d+*/", "/^vaule\d+$/"];
+			
+			spyOn(String.prototype, 'test').and.callThrough();
+		});
+		
+		it("profile is returned with optional after process", function () {
+			var _profile;
+			
+			profile.optional_regexp = singleRegex;
+			_profile = processOptionalRegexp(profile, data);
+			
+			expect(_profile.optional).toBeDefined();
+		});
+		
+		it("profile is returned with optional as an array", function () {
+			var _profile;
+			
+			profile.optional_regexp = singleRegex;
+			_profile = processOptionalRegexp(profile, data);
+			
+			expect(_profile.optional).toBe(jasmine.any(Array));
+		});
+		
+		it("uses the String.test function to test", function () {
+			var _profile;
+			
+			profile.optional_regexp = singleRegex;
+			_profile = processOptionalRegexp(profile, data);
+			
+			expect(String.prototype.test).toHaveBeenCalled();
+			
+		});
+		
+		describe("is supplied a single regex string", function () {
+			it("it calls String.test once for each key in the data", function () {
+				var _profile;
+			
+				profile.optional_regexp = singleRegex;
+				_profile = processOptionalRegexp(profile, data);
+			
+				expect(String.prototype.test.calls.count()).toBe(data.length);
+			});
+		
+			it("it adds the matched fields to the profile.optional array", function () {	
+				var _profile;
+				
+				profile.optional_regexp = singleRegex;
+				_profile = processOptionalRegexp(profile, data);
+				
+				expect(_profile.optional.length).toBe(2);
+			});
+		});
+		
+		describe("is supplied a mutiple regexs", function () {
+			it("it calls String.test for each optional_regexp and data key combonation", function () {
+				var _profile;
+			
+				profile.optional_regexp = multiRegex;
+				_profile = processOptionalRegexp(profile, data);
+			
+				expect(String.prototype.test.calls.count()).toBe(profile.optional_regexp.length * data.length);
+			});
+		
+			it("it adds the matched fields to the profile.optional array", function () {	
+				var _profile;
+				
+				profile.optional_regexp = multiRegex;
+				_profile = processOptionalRegexp(profile, data);
+				
+				expect(_profile.optional.length).toBe(3);
+			});
+		});		
 	});
+	
 	describe("of dependency_groups", function() {
 		pending();
 	});
