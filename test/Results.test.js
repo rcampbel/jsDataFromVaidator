@@ -1,5 +1,20 @@
 'use strict';
 
+var customMatchers = {
+	isArray: function(util, customEqualityTesters) {
+		return {
+			compare: function(actual) {
+				var result = {};
+
+				result.pass = (actual && typeof actual === 'object' && actual instanceof Array);
+				result.message = "Expected " + actual + " to be an Array";
+
+				return result;
+			}
+		};
+	}
+};
+
 describe("Helper Function", function () {
 
 	describe("isEmpty, ", function () {
@@ -42,6 +57,42 @@ describe("Helper Function", function () {
 			expect(isEmpty(undefValue)).toEqual(true);
 		});
 	});
+
+	describe("isArray", function () {
+	
+		beforeEach(function() {
+			jasmine.addMatchers(customMatchers);
+		});
+
+		it("[] is an array", function () {
+			expect(isArray([])).toEqual(true);
+		});
+		
+		it("Array is an array", function () {
+			expect(isArray(new Array())).toEqual(true);
+		});
+		
+		it("'array' is not an array", function () {
+			expect(isArray("array")).toEqual(false);
+		});
+		
+		it("Object is not an array", function () {
+			expect(isArray(new Object())).toEqual(false);
+		});
+		
+		it("{} is not an array", function () {
+			expect(isArray({})).toEqual(false);
+		});
+		
+		it("null is not an array", function () {
+			expect(isArray(null)).toEqual(false);
+		});
+		
+		it("<blank> is not an array", function () {
+			expect(isArray()).toEqual(false);
+		});
+		
+	});
 });
 
 describe("Profile processing", function(){
@@ -49,9 +100,11 @@ describe("Profile processing", function(){
 		data,
 		singleRegex = "",
 		multiRegex = [];
-		
 	
-
+	beforeEach(function() {
+		jasmine.addMatchers(customMatchers);
+	});
+	
 	describe("of required_regex", function() {
 		beforeEach(function () {
 
@@ -67,45 +120,66 @@ describe("Profile processing", function(){
 			singleRegex = "/^field\d+*/";
 			multiRegex = ["/^field\d+*/", "/^vaule\d+$/"];
 			
-			spyOn(String.prototype, 'test').and.callThrough();
+			spyOn(String.prototype, 'match').and.callThrough();
 		});
 		
-		it("profile is returned with required after process", function () {
+		it("profile is returned", function () {
 			var _profile;
 			
 			profile.require_regex = singleRegex;
 			_profile = processRequiredRegex(profile, data);
 			
-			expect(_profile.required).toBeDefined();
+			expect(_profile).toBeDefined();
 		});
 		
+		describe("returns required in profile after process", function () {
+			it("when proifile does not have requried defined", function () {
+				var _profile;
+				
+				profile.require_regex = singleRegex;
+				_profile = processRequiredRegex(profile, data);
+				
+				expect(_profile.required).toBeDefined();
+			});
+			
+			it("when proifile has requried defined", function () {
+				var _profile;
+				
+				profile.require_regex = singleRegex;
+				profile.require = ["max3"];
+				_profile = processRequiredRegex(profile, data);
+				
+				expect(_profile.required).toBeDefined();
+			});
+		});
+			
 		it("profile is returned with required as an array", function () {
 			var _profile;
 			
 			profile.require_regex = singleRegex;
 			_profile = processRequiredRegex(profile, data);
 			
-			expect(_profile.required).toBe(jasmine.any(Array));
+			expect(_profile.required).isArray();
 		});
 		
-		it("uses the String.test function to test", function () {
+		it("uses the String.match function to match", function () {
 			var _profile;
 			
 			profile.require_regex = singleRegex;
 			_profile = processRequiredRegex(profile, data);
 			
-			expect(String.prototype.test).toHaveBeenCalled();
+			expect(String.prototype.match).toHaveBeenCalled();
 			
 		});
 		
 		describe("is supplied a single regex string", function () {
-			it("it calls String.test once for each key in the data", function () {
+			it("it calls String.match once for each key in the data", function () {
 				var _profile;
 			
 				profile.require_regex = singleRegex;
 				_profile = processRequiredRegex(profile, data);
 			
-				expect(String.prototype.test.calls.count()).toBe(data.length);
+				expect(String.prototype.match.calls.count()).toBe(data.length);
 			});
 		
 			it("it adds the matched fields to the profile.required array", function () {	
@@ -119,13 +193,13 @@ describe("Profile processing", function(){
 		});
 		
 		describe("is supplied a mutiple regexs", function () {
-			it("it calls String.test for each require_regex and data key combonation", function () {
+			it("it calls String.match for each require_regex and data key combonation", function () {
 				var _profile;
 			
 				profile.require_regex = multiRegex;
 				_profile = processRequiredRegex(profile, data);
 			
-				expect(String.prototype.test.calls.count()).toBe(profile.require_regex.length * data.length);
+				expect(String.prototype.match.calls.count()).toBe(profile.require_regex.length * data.length);
 			});
 		
 			it("it adds the matched fields to the profile.required array", function () {	
@@ -164,7 +238,16 @@ describe("Profile processing", function(){
 			singleRegex = "/^field\d+*/";
 			multiRegex = ["/^field\d+*/", "/^vaule\d+$/"];
 			
-			spyOn(String.prototype, 'test').and.callThrough();
+			spyOn(String.prototype, 'match').and.callThrough();
+		});
+		
+		it("profile is returned", function () {
+			var _profile;
+			
+			profile.require_regex = singleRegex;
+			_profile = processOptionalRegexp(profile, data);
+			
+			expect(_profile).toBeDefined();
 		});
 		
 		it("profile is returned with optional after process", function () {
@@ -185,24 +268,24 @@ describe("Profile processing", function(){
 			expect(_profile.optional).toBe(jasmine.any(Array));
 		});
 		
-		it("uses the String.test function to test", function () {
+		it("uses the String.match function to match", function () {
 			var _profile;
 			
 			profile.optional_regexp = singleRegex;
 			_profile = processOptionalRegexp(profile, data);
 			
-			expect(String.prototype.test).toHaveBeenCalled();
+			expect(String.prototype.match).toHaveBeenCalled();
 			
 		});
 		
 		describe("is supplied a single regex string", function () {
-			it("it calls String.test once for each key in the data", function () {
+			it("it calls String.match once for each key in the data", function () {
 				var _profile;
 			
 				profile.optional_regexp = singleRegex;
 				_profile = processOptionalRegexp(profile, data);
 			
-				expect(String.prototype.test.calls.count()).toBe(data.length);
+				expect(String.prototype.match.calls.count()).toBe(data.length);
 			});
 		
 			it("it adds the matched fields to the profile.optional array", function () {	
@@ -216,13 +299,13 @@ describe("Profile processing", function(){
 		});
 		
 		describe("is supplied a mutiple regexs", function () {
-			it("it calls String.test for each optional_regexp and data key combonation", function () {
+			it("it calls String.match for each optional_regexp and data key combonation", function () {
 				var _profile;
 			
 				profile.optional_regexp = multiRegex;
 				_profile = processOptionalRegexp(profile, data);
 			
-				expect(String.prototype.test.calls.count()).toBe(profile.optional_regexp.length * data.length);
+				expect(String.prototype.match.calls.count()).toBe(profile.optional_regexp.length * data.length);
 			});
 		
 			it("it adds the matched fields to the profile.optional array", function () {	
