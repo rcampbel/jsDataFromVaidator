@@ -26,6 +26,134 @@ function isEmpty (value) {
 	return rtval;
 }
 
+function isArray (value) {
+	var rtval = false;
+	
+	if (value && value != null && typeof value != "undefined" && typeof value === 'object' && value instanceof Array) {
+		rtval = true;
+	}
+	
+	return rtval;
+}
+
+function toRegex (value) {
+	var returnRegex = null,
+		selfValue;
+	
+	if (typeof value === "string" && isNaN(value)) {
+		selfValue = value.trim();
+		selfValue = selfValue.replace(/^\/(.*)\/$/, "$1");
+
+		returnRegex = new RegExp(selfValue);
+	} else if (value instanceof RegExp){
+		returnRegex = value;
+	}
+	
+	return returnRegex;
+}
+
+function objectLength (value) {
+	var returnValue = 0;
+	
+	if(value === null || typeof value !== "object"){
+		returnValue = -1;
+	}
+	
+	if (isArray(value)){
+		returnValue = value.length;
+	} else {
+		for (key in value) {
+			if (value.hasOwnProperty(key)) {
+				returnValue += 1;
+			}
+		}
+	}
+	
+	return returnValue;
+}
+
+function returnKeyMatch (regex, obj) {
+	var myRegex,
+		returnArray = [];
+	
+	myRegex = toRegex(regex);
+	for (var key in obj) {
+		if (obj.hasOwnProperty(key) && myRegex.test(key)){
+			returnArray.push(key);
+		}
+	}
+	
+	return returnArray;
+}
+
+//Not Order Safe
+function uniqueMergeArray () {
+	var _values = {},
+		returnValue = [];
+	
+	for (var i = 0; i < arguments.length; i++) {
+		if (isArray(arguments[i])) {
+			for (var y = 0; y < arguments[i].length; y++) {
+				if (!_values[arguments[i][y]]) {
+					_values[arguments[i][y]] = true;
+					returnValue.push(arguments[i][y]);
+				}
+			}
+		}
+	}
+	
+	return returnValue;
+}
+
+function processRequiredRegex (profile, data) {
+	var myProfile = profile,
+		matchedKeys = [],
+		returnedMatchedKeys,
+		profileRequiredRegex;
+		
+	if (!myProfile || typeof myProfile != "object" || isArray(myProfile)) {
+		throw new TypeError("invalidProfile");
+	}
+	
+	if (
+		typeof myProfile.required_regex === "undefined" || 
+		myProfile.required_regex === null ||
+		myProfile.required_regex === "" || 
+		(isArray(myProfile.required_regex) && myProfile.required_regex.length <= 0) ||
+		typeof data === "undefined" ||
+		data === null || 
+		typeof data !== "object" ||
+		(typeof data === "object" && isArray(data)) ||
+		objectLength(data) <= 0
+	) {
+		
+		return myProfile;
+	}
+	
+	if (typeof myProfile.required === "undefined" || myProfile.required === null) {
+		myProfile.required = new Array();
+	} else if (!isArray(myProfile.required)) {
+		throw new TypeError("invalidProfile");
+	}
+	
+	matchedKeys.push(myProfile.required);
+		
+	profileRequiredRegex = isArray(myProfile.required_regex) ? myProfile.required_regex : [myProfile.required_regex];
+	
+	for (var index = 0; index < profileRequiredRegex.length; index++) {
+		returnedMatchedKeys = returnKeyMatch(profileRequiredRegex[index], data);
+		if (isArray(returnedMatchedKeys) && returnedMatchedKeys.length > 0){
+			matchedKeys.push(returnedMatchedKeys);
+		}
+	}
+	
+	myProfile.required = uniqueMergeArray.apply(this, matchedKeys);
+	
+	return myProfile
+}
+
+function processOptionalRegex (profile, data) {}
+
 /*
 {
 	required : [
