@@ -220,3 +220,6 @@ pip-log.txt
 ##############
 
 node_modules/
+unitTest/checkout/coverage/Chrome 40.0.2214 (Windows 7)/index.html
+unitTest/checkout/coverage/Chrome 40.0.2214 (Windows 7)/prettify.css
+unitTest/checkout/coverage/Chrome 40.0.2214 (Windows 7)/prettify.js
