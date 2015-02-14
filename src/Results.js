@@ -105,7 +105,7 @@ function uniqueMergeArray () {
 	return returnValue;
 }
 
-function processRegexOption (settings) {
+function processRegexToProfileArrays (settings) {
 	var profile = settings.profile,
 		matchedKeys = [],
 		processValues = [],
@@ -145,13 +145,13 @@ function processRegexOption (settings) {
 		"field6",
 		"field7"
 	],
-	required_regexp : <regex>||[<regex>,<regex>, ...],
+	<processRegexOption> <== required_regexp : <regex>||[<regex>,<regex>, ...],
 	optional : [
 		"field1",
 		"field2",
 		"field3"
 	],
-	optional_regexp : <regex>||[<regex>,<regex>, ...],
+	<processRegexOption> <== optional_regexp : <regex>||[<regex>,<regex>, ...],
 	dependencies : {
 		field1 : [<field_name>, ...],
 		field2 : {

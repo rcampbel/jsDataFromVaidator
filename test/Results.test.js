@@ -284,7 +284,7 @@ describe("Profile processing function", function(){
 		jasmine.addMatchers(customMatchers);
 	});
 	
-	describe("processRegexOption", function() {
+	describe("processRegexToProfileArrays", function() {
 		
 		var settings = {};
 		
@@ -299,7 +299,7 @@ describe("Profile processing function", function(){
 		});
 	
 		it("is a function", function() {
-			expect(window.processRegexOption).toEqual(jasmine.any(Function));
+			expect(window.processRegexToProfileArrays).toEqual(jasmine.any(Function));
 		});
 		
 		describe("when passed settings", function() {
@@ -311,7 +311,7 @@ describe("Profile processing function", function(){
 					settings.processKey = "a";
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexOption(settings);
+						newProfile = processRegexToProfileArrays(settings);
 									
 					expect(newProfile).toEqual(testProfile);
 				});
@@ -322,7 +322,7 @@ describe("Profile processing function", function(){
 						settings.processKey = "a"
 						settings.profile = {"a":1, "b":2};
 						
-						var newProfile = processRegexOption(settings);
+						var newProfile = processRegexToProfileArrays(settings);
 						expect(newProfile[settings.outputKey]).toBeDefined();
 					});
 			
@@ -331,7 +331,7 @@ describe("Profile processing function", function(){
 						settings.processKey = "a"
 						settings.profile = {"a":1, "b":2};
 						
-						var newProfile = processRegexOption(settings);
+						var newProfile = processRegexToProfileArrays(settings);
 						expect(newProfile[settings.outputKey]).toEqual(jasmine.any(Array));
 					});
 				});
@@ -341,7 +341,7 @@ describe("Profile processing function", function(){
 					settings.profile = {"injectTest" : null, "injectRegex": "a"};
 					settings.processKey = "injectRegex";
 					
-					var newProfile = processRegexOption(settings);
+					var newProfile = processRegexToProfileArrays(settings);
 					expect(newProfile[settings.outputKey]).toEqual(jasmine.any(Array));
 				});
 			});
@@ -354,7 +354,7 @@ describe("Profile processing function", function(){
 					settings.processKey = [];
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexOption(settings);
+						newProfile = processRegexToProfileArrays(settings);
 					
 					expect(newProfile).toEqual(testProfile);
 				});
@@ -365,7 +365,7 @@ describe("Profile processing function", function(){
 					settings.processKey = "injectRegex";
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexOption(settings);
+						newProfile = processRegexToProfileArrays(settings);
 					
 					expect(newProfile).toEqual(testProfile);
 				});
@@ -376,7 +376,7 @@ describe("Profile processing function", function(){
 					settings.processKey = "injectRegex";
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexOption(settings);
+						newProfile = processRegexToProfileArrays(settings);
 					
 					expect(newProfile).toEqual(testProfile);
 				});				
@@ -395,7 +395,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 					
-					processRegexOption(settings);
+					processRegexToProfileArrays(settings);
 
 					expect(window.isArray).toHaveBeenCalled();
 				});
@@ -405,7 +405,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 					
-					processRegexOption(settings);
+					processRegexToProfileArrays(settings);
 
 					expect(window.isArray).toHaveBeenCalledWith(settings.profile.testKey);
 				});
@@ -420,7 +420,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 
-					processRegexOption(settings);
+					processRegexToProfileArrays(settings);
 
 					expect(window.returnKeyMatch).toHaveBeenCalled();
 				});	
@@ -430,7 +430,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 
-					processRegexOption(settings);
+					processRegexToProfileArrays(settings);
 
 					expect(window.returnKeyMatch).toHaveBeenCalledWith(settings.profile.testKey, settings.data);
 
@@ -441,7 +441,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = [/^test/, "value\d"];
 
-					processRegexOption(settings);
+					processRegexToProfileArrays(settings);
 
 					expect(window.returnKeyMatch.calls.count()).toBe(2);					
 				});
@@ -456,7 +456,7 @@ describe("Profile processing function", function(){
 
 				spyOn(window, "uniqueMergeArray");
 				
-				processRegexOption(settings);
+				processRegexToProfileArrays(settings);
 				
 				expect(window.uniqueMergeArray).toHaveBeenCalled();
 			});	
