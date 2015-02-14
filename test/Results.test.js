@@ -463,7 +463,11 @@ describe("Profile processing function", function(){
 		});
 	});
 		
-	
+	describe("combineRegexToNorms", function() {
+		it('is a function', function() {
+			expect(combineRexToNorms).toEqual(jasmine.any(Function));
+		});
+	});
 
 
 });
