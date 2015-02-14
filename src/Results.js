@@ -105,54 +105,37 @@ function uniqueMergeArray () {
 	return returnValue;
 }
 
-function processRequiredRegex (profile, data) {
-	var myProfile = profile,
+function processRegexOption (settings) {
+	var profile = settings.profile,
 		matchedKeys = [],
-		returnedMatchedKeys,
-		profileRequiredRegex;
-		
-	if (!myProfile || typeof myProfile != "object" || isArray(myProfile)) {
-		throw new TypeError("invalidProfile");
-	}
-	
-	if (
-		typeof myProfile.required_regex === "undefined" || 
-		myProfile.required_regex === null ||
-		myProfile.required_regex === "" || 
-		(isArray(myProfile.required_regex) && myProfile.required_regex.length <= 0) ||
-		typeof data === "undefined" ||
-		data === null || 
-		typeof data !== "object" ||
-		(typeof data === "object" && isArray(data)) ||
-		objectLength(data) <= 0
-	) {
-		
-		return myProfile;
-	}
-	
-	if (typeof myProfile.required === "undefined" || myProfile.required === null) {
-		myProfile.required = new Array();
-	} else if (!isArray(myProfile.required)) {
-		throw new TypeError("invalidProfile");
-	}
-	
-	matchedKeys.push(myProfile.required);
-		
-	profileRequiredRegex = isArray(myProfile.required_regex) ? myProfile.required_regex : [myProfile.required_regex];
-	
-	for (var index = 0; index < profileRequiredRegex.length; index++) {
-		returnedMatchedKeys = returnKeyMatch(profileRequiredRegex[index], data);
-		if (isArray(returnedMatchedKeys) && returnedMatchedKeys.length > 0){
-			matchedKeys.push(returnedMatchedKeys);
-		}
-	}
-	
-	myProfile.required = uniqueMergeArray.apply(this, matchedKeys);
-	
-	return myProfile
-}
+		processValues = [],
+		returnedMatchedKeys = null;
 
-function processOptionalRegex (profile, data) {}
+	if (typeof settings.outputKey === "string" &&
+		typeof settings.processKey === "string" &&
+		typeof profile[settings.processKey] !== "undefined" &&
+		profile[settings.processKey] !== null) {
+	
+		matchedKeys.push(profile[settings.outputKey] || []);
+
+		if (isArray(profile[settings.processKey])) {
+			processValues = profile[settings.processKey];
+		} else {
+			processValues.push(profile[settings.processKey]);
+		}
+
+		for (var keyIndex = 0; keyIndex < processValues.length; keyIndex++) {
+			returnedMatchedKeys = returnKeyMatch(processValues[keyIndex], settings.data);
+			if (returnedMatchedKeys.length > 0) {
+				matchedKeys.push(returnedMatchedKeys);
+			}		
+		}
+
+		profile[settings.outputKey] = uniqueMergeArray.apply(this ,matchedKeys);
+	}
+	
+	return profile;
+}
 
 /*
 {

@@ -86,8 +86,7 @@ describe("Helper Function", function () {
 		
 		it("<blank> is not an array", function () {
 			expect(isArray()).toEqual(false);
-		});
-		
+		});	
 	});
 	
 	describe("toRegex", function() {
@@ -275,7 +274,7 @@ describe("Helper Function", function () {
 	});
 });
 
-describe("Profile processing", function(){
+describe("Profile processing function", function(){
 	var profile,
 		data,
 		singleRegex = "",
@@ -285,356 +284,186 @@ describe("Profile processing", function(){
 		jasmine.addMatchers(customMatchers);
 	});
 	
-	describe("of required_regex", function() {
-		beforeEach(function () {
-
-			profile = {};
-			data = {
-				"field1" : "a",
-				"field2" : ["c","d"],
-				"radio1" : "e",
-				"radio2" : "f",
-				"value1" : ""
+	describe("processRegexOption", function() {
+		
+		var settings = {};
+		
+		beforeEach(function() {
+			settings = {
+				data: {},
+				outputKey: "injectTest",
+				processKey: "injectTest",
+				profile: {}
 			};
 			
-			singleRegex = /^field\d+/;
-			multiRegex = [/^field\d+/, "/^value\\d+$/"];
-			
-			spyOn(String.prototype, 'match').and.callThrough();
-		});
-		
-		describe("is passed a profile", function () {
-			describe("that is null", function () {
-				it("it throws an execption", function() {
-					expect(function() {
-						processRequiredRegex(null);
-					}).toThrowError();
-				});
-
-				it("it throws a TypeError exception with eht message of invalidProfile", function() {
-					expect(function() {
-						processRequiredRegex(null);
-					}).toThrow(new TypeError("invalidProfile"));
-				});
-			});
-			
-			describe("that is a string", function () {
-				it("it throws an execption", function() {
-					expect(function() {
-						processRequiredRegex("test");
-					}).toThrowError();
-				});
-
-				it("it throws a TypeError exception with the message of invalidProfile", function() {
-					expect(function() {
-						processRequiredRegex("test");
-					}).toThrow(new TypeError("invalidProfile"));
-				});
-			});
-			
-			describe("that is an array", function () {
-				it("it throws an execption", function() {
-					expect(function() {
-						processRequiredRegex(["test"]);
-					}).toThrowError();
-				});
-
-				it("it throws a TypeError exception with the message of invalidProfile", function() {
-					expect(function() {
-						processRequiredRegex(["test"]);
-					}).toThrow(new TypeError("invalidProfile"));
-				});
-			});
-			
-			describe("that is an object", function() {
-				it("it returns a value", function () {
-					var _profile;
-					
-					profile.require_regex = singleRegex;
-					_profile = processRequiredRegex(profile, data);
-					
-					expect(_profile).toBeDefined();
-				});
-														
-				describe("without predifined required attribute", function() {
-				
-					beforeEach(function() {
-						profile.required_regex = "someVal";
-					});
-				
-					it("it adds the key requried to the returned profile", function() {
-						var _profile;
-						_profile = processRequiredRegex(profile, data);
-					
-						expect(_profile.hasOwnProperty("required")).toEqual(true);
-					});
-					
-					it("it adds the key requried and sets it to be an array to the returned profile", function() {
-						var _profile;
-						_profile = processRequiredRegex(profile, data);
-					
-						expect(_profile.required).toEqual(jasmine.any(Array));
-					});					
-				});
-				
-				describe("throws a TypeErrror with the message of invalidProfile when requried is defined and is", function(){
-					it("an empty string", function() {
-						profile.required = "";
-						profile.required_regex = singleRegex;
-						expect(function() {
-							processRequiredRegex(profile, data);
-						}).toThrow(new TypeError("invalidProfile"))
-					});
-					
-					it("an empty object", function() {
-						profile.required = {};
-						profile.required_regex = singleRegex;
-						expect(function() {
-							processRequiredRegex(profile, data);
-						}).toThrow(new TypeError("invalidProfile"))
-					});
-				});
-				
-				describe("with requried_regex", function() {
-					
-					describe("is not in the profile", function() {
-						it("it returns the profile unchanged", function(){
-							var _profile,
-								selfProfile;
-							
-							selfProfile =  JSON.parse(JSON.stringify(profile));
-							_profile = processRequiredRegex(profile, data);
-					
-							expect(_profile).toEqual(selfProfile);
-						});
-					});
-										
-					describe("as null", function() {
-						it("it returns the profile unchanged", function(){
-							var _profile,
-								selfProfile;
-							
-							profile.required_regex = null;
-							selfProfile =  JSON.parse(JSON.stringify(profile));
-							_profile = processRequiredRegex(profile, data);
-					
-							expect(_profile).toEqual(selfProfile);
-						});
-					});
-					
-					describe("as a string", function() {
-						it("that is empty, it returns the profile unchanged", function () {
-							var _profile,
-								selfProfile;
-							profile.required_regex = "";
-							selfProfile =  JSON.parse(JSON.stringify(profile));
-							_profile = processRequiredRegex(profile, data);
-					
-							expect(_profile).toEqual(selfProfile);
-						});						
-					});
-										
-					describe("as an Array", function() {
-						
-						it("it returns the profile unchanged when empty", function(){
-							var _profile,
-								selfProfile;
-							
-							profile.required_regex = [];
-							selfProfile =  JSON.parse(JSON.stringify(profile));
-							_profile = processRequiredRegex(profile, data);
-					
-							expect(_profile).toEqual(selfProfile);
-						});
-					});
-					
-					
-				});
-				
-			});
-		});
-
-		describe("is passed data", function() {
-			it("that is undeifned, it returns the profile unchanged", function () {
-				var _profile,
-					selfProfile;
-					
-				profile.required_regex = "test";
-				selfProfile = JSON.parse(JSON.stringify(profile));
-				_profile = processRequiredRegex(profile);
-				
-				expect(_profile).toEqual(selfProfile);
-			});
-			
-			it("that is null, it returns the profile unchanged", function () {
-				var _profile,
-					selfProfile;
-					
-				profile.required_regex = "test";
-				selfProfile = JSON.parse(JSON.stringify(profile));
-				_profile = processRequiredRegex(profile, null);
-				
-				expect(_profile).toEqual(selfProfile);
-			});
-			
-			it("that is a non-object, it returns the profile unchanged", function () {
-				var _profile,
-					selfProfile;
-					
-				profile.required_regex = "test";
-				selfProfile = JSON.parse(JSON.stringify(profile));
-				_profile = processRequiredRegex(profile, "test");
-				
-				expect(_profile).toEqual(selfProfile);
-			});
-			
-			it("that is an Array, it returns the profile unchanged", function () {
-				var _profile,
-					selfProfile;
-					
-				profile.required_regex = "test";
-				selfProfile = JSON.parse(JSON.stringify(profile));
-				_profile = processRequiredRegex(profile, ["test"]);
-				
-				expect(_profile).toEqual(selfProfile);
-			});
-			
-			describe("that is an object", function() {
-				
-				it("it calls objectLength", function() {
-					var _profile,
-						selfProfile;
-					
-					spyOn(window, "objectLength");
-					profile.required_regex = "test";
-					selfProfile = JSON.parse(JSON.stringify(profile));
-					_profile = processRequiredRegex(profile, {});
-					
-					expect(window.objectLength).toHaveBeenCalled();
-				});
-								
-				it("it calls objectLength with the supplied data", function() {
-					var _profile,
-						selfProfile;
-					
-					spyOn(window, "objectLength");
-					profile.required_regex = "test";
-					selfProfile = JSON.parse(JSON.stringify(profile));
-					_profile = processRequiredRegex(profile, data);
-					
-					expect(window.objectLength).toHaveBeenCalledWith(data);
-				});
-				
-				it("which is empty returns the profile unchanged", function () {
-					var _profile,
-						selfProfile;
-					
-					profile.required_regex = "test";
-					selfProfile = JSON.parse(JSON.stringify(profile));
-					_profile = processRequiredRegex(profile, {});
-					
-					expect(_profile).toEqual(selfProfile);
-				});
-			});
 		});
 	
-		describe("is applied", function() {
+		it("is a function", function() {
+			expect(window.processRegexOption).toEqual(jasmine.any(Function));
+		});
+		
+		describe("when passed settings", function() {
+			describe("with an outputKey", function() {
+				
+				it("that is not a string, it returns the profile unchanged", function() {
+					settings.profile = {"a":1, "b":2};
+					settings.outputKey = [];
+					settings.processKey = "a";
+					
+					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
+						newProfile = processRegexOption(settings);
+									
+					expect(newProfile).toEqual(testProfile);
+				});
 			
-			describe("when required_regex is a single value", function() {
-				beforeEach(function() {
-					profile = {
-						"required": ["radio1"],
-						"required_regex": singleRegex
-					};
-				});
-				it("it calls returnKeyMatch", function() {
-					spyOn(window, "returnKeyMatch");
-					
-					processRequiredRegex(profile, data);
-					
-					expect(window.returnKeyMatch).toHaveBeenCalled();
-				});
-				
-				it("it calls returnKeyMatch with the required_regex and data", function() {
-					spyOn(window, "returnKeyMatch");
-					
-					processRequiredRegex(profile, data);
-					
-					expect(window.returnKeyMatch).toHaveBeenCalledWith(profile.required_regex, data);
+				describe("that is undefined in the profile", function() {
+					it("it adds the outputKey to the profile", function() {
+						settings.outputKey = "injectTest";
+						settings.processKey = "a"
+						settings.profile = {"a":1, "b":2};
+						
+						var newProfile = processRegexOption(settings);
+						expect(newProfile[settings.outputKey]).toBeDefined();
+					});
+			
+					it("it adds the outputKey to the profile with a value of []", function() {
+						settings.outputKey = "injectTest";
+						settings.processKey = "a"
+						settings.profile = {"a":1, "b":2};
+						
+						var newProfile = processRegexOption(settings);
+						expect(newProfile[settings.outputKey]).toEqual(jasmine.any(Array));
+					});
 				});
 				
-				it("it calls uniqueMergeArray", function() {
-					spyOn(window, "uniqueMergeArray");
+				it("that is null, it sets the outputKey to with a value of []", function() {
+					settings.outputKey = "injectTest";
+					settings.profile = {"injectTest" : null, "injectRegex": "a"};
+					settings.processKey = "injectRegex";
 					
-					processRequiredRegex(profile, data);
-					
-					expect(window.uniqueMergeArray).toHaveBeenCalled();
-				});
-				
-				it("it adds the match fields to the profile.required", function() {
-					var _profile;
-					
-					_profile = processRequiredRegex(profile, data);
-					
-					expect(_profile.required).toContain("radio1");
-					expect(_profile.required).toContain("field1");
-					expect(_profile.required).toContain("field2");
+					var newProfile = processRegexOption(settings);
+					expect(newProfile[settings.outputKey]).toEqual(jasmine.any(Array));
 				});
 			});
 			
-			describe("when required_regex is an array", function() {
-				beforeEach(function() {
-					profile = {
-						"required": ["radio1"],
-						"required_regex": multiRegex
-					};
+			describe("with a processKey", function() {
+			
+				it("that is not a string, it returns the profile unchanged", function() {
+					settings.profile = {"a":1, "b":2};
+					settings.outputKey = "injectString";
+					settings.processKey = [];
+					
+					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
+						newProfile = processRegexOption(settings);
+					
+					expect(newProfile).toEqual(testProfile);
 				});
 				
-				it("it calls returnKeyMatch", function() {
-					spyOn(window, "returnKeyMatch");
+				it("that does not exist in the profile, it returns the profile unchanged", function () {
+					settings.profile = {"a":1, "b":2};
+					settings.outputKey = "injectString";
+					settings.processKey = "injectRegex";
 					
-					processRequiredRegex(profile, data);
+					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
+						newProfile = processRegexOption(settings);
 					
-					expect(window.returnKeyMatch).toHaveBeenCalled();
+					expect(newProfile).toEqual(testProfile);
 				});
 				
-				it("it calls returnKeyMatch for each required_regex", function() {
-					spyOn(window, "returnKeyMatch");
+				it("that is null in the profile, it returns the profile unchanged", function () {
+					settings.profile = {"a":1, "b":2, "injectRegex": null};
+					settings.outputKey = "injectString";
+					settings.processKey = "injectRegex";
 					
-					processRequiredRegex(profile, data);
+					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
+						newProfile = processRegexOption(settings);
 					
-					expect(window.returnKeyMatch.calls.count()).toEqual(profile.required_regex.length);
-				});
-				
-				it("it calls returnKeyMatch with the required_regex and data", function() {
-					spyOn(window, "returnKeyMatch");
-					
-					processRequiredRegex(profile, data);
-						
-					for (var _value = 0; _value < profile.required_regex.length; _value++) {
-						expect(window.returnKeyMatch).toHaveBeenCalledWith(profile.required_regex[_value], data);
-					}
-				});
-				
-				it("it calls uniqueMergeArray", function() {
-					spyOn(window, "uniqueMergeArray");
-					
-					processRequiredRegex(profile, data);
-					
-					expect(window.uniqueMergeArray).toHaveBeenCalled();
-				});
-				
-				it("it adds the match fields to the profile.required", function() {
-					var _profile;
-					
-					_profile = processRequiredRegex(profile, data);
-					
-					expect(_profile.required).toContain("radio1");
-					expect(_profile.required).toContain("field1");
-					expect(_profile.required).toContain("field2");
-					expect(_profile.required).toContain("value1");
-				});
+					expect(newProfile).toEqual(testProfile);
+				});				
 			});
 		});
+
+		describe('calls the function', function() {
+			
+			describe('isArray', function() {
+				beforeEach(function() {
+					spyOn(window, "isArray");
+				});
+
+				it('when settings.processKey is supplied', function () {
+					settings.processKey = "testKey";
+					settings.outputKey = "injectString";
+					settings.profile.testKey = /^test/;
+					
+					processRegexOption(settings);
+
+					expect(window.isArray).toHaveBeenCalled();
+				});
+
+				it("with settings.profile.[settings.processKey]", function() {
+					settings.processKey = "testKey";
+					settings.outputKey = "injectString";
+					settings.profile.testKey = /^test/;
+					
+					processRegexOption(settings);
+
+					expect(window.isArray).toHaveBeenCalledWith(settings.profile.testKey);
+				});
+			});
+
+			describe('returnKeyMatch', function() {
+				beforeEach(function() {
+					spyOn(window, "returnKeyMatch").and.returnValue([]);
+				});
+				it('once when one settings.processKey is supplied', function() {
+					settings.processKey = "testKey";
+					settings.outputKey = "injectString";
+					settings.profile.testKey = /^test/;
+
+					processRegexOption(settings);
+
+					expect(window.returnKeyMatch).toHaveBeenCalled();
+				});	
+
+				it('with settings.profile[settings.processKey] and settings.data', function() {
+					settings.processKey = "testKey";
+					settings.outputKey = "injectString";
+					settings.profile.testKey = /^test/;
+
+					processRegexOption(settings);
+
+					expect(window.returnKeyMatch).toHaveBeenCalledWith(settings.profile.testKey, settings.data);
+
+				});
+
+				it("twice when the settings.profile[settings.processKey] contains more then one value", function() {
+					settings.processKey = "testKey";
+					settings.outputKey = "injectString";
+					settings.profile.testKey = [/^test/, "value\d"];
+
+					processRegexOption(settings);
+
+					expect(window.returnKeyMatch.calls.count()).toBe(2);					
+				});
+			});
+
+			// Can only test that it is being called since I have found no good way of syping on Function.prototype.apply
+			it("uniqueMergeArray", function() {
+					
+				settings.processKey = "testKey";
+				settings.outputKey = "injectString";
+				settings.profile.testKey = [/^test/, "value\d"];
+
+				spyOn(window, "uniqueMergeArray");
+				
+				processRegexOption(settings);
+				
+				expect(window.uniqueMergeArray).toHaveBeenCalled();
+			});	
+		});
 	});
+		
+	
+
+
 });
