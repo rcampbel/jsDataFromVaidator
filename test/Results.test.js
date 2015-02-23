@@ -16,7 +16,6 @@ var customMatchers = {
 };
 
 describe("Helper Function", function () {
-
 	describe("isEmpty, ", function () {
 		
 		var emptyObj = {},
@@ -162,10 +161,9 @@ describe("Helper Function", function () {
 			expect(objectLength({})).toEqual(0);
 			expect(objectLength({a: 1,b: 2})).toEqual(2);
 		});
-			
 	});
 
-	describe("retrunKeyMatch", function() {
+	describe("returnKeyMatch", function() {
 		var regex,
 			obj,
 			objLength,
@@ -241,7 +239,6 @@ describe("Helper Function", function () {
 		it("it returns an empty array if data is not a object", function () {
 			expect(returnKeyMatch(regex, "why")).toEqual(jasmine.any(Array));
 		});
-		
 	});
 	
 	describe("uniqueMergeArray", function() {
@@ -271,6 +268,14 @@ describe("Helper Function", function () {
 			expect(mergedArrays).toContain("b");
 			expect(mergedArrays).toContain("c");
 		});
+
+		it("it returns an array with the arrays and non-arrays merged into one", function() {
+			var mergedArrays = uniqueMergeArray(["a"], ["b","c"], "d");
+			expect(mergedArrays).toContain("a");
+			expect(mergedArrays).toContain("b");
+			expect(mergedArrays).toContain("c");
+			expect(mergedArrays).toContain("d");
+		});
 	});
 });
 
@@ -284,7 +289,7 @@ describe("Profile processing function", function(){
 		jasmine.addMatchers(customMatchers);
 	});
 	
-	describe("processRegexToProfileArrays", function() {
+	describe("extendArrayWithRegex", function() {
 		
 		var settings = {};
 		
@@ -299,7 +304,7 @@ describe("Profile processing function", function(){
 		});
 	
 		it("is a function", function() {
-			expect(window.processRegexToProfileArrays).toEqual(jasmine.any(Function));
+			expect(window.extendArrayWithRegex).toEqual(jasmine.any(Function));
 		});
 		
 		describe("when passed settings", function() {
@@ -311,7 +316,7 @@ describe("Profile processing function", function(){
 					settings.processKey = "a";
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexToProfileArrays(settings);
+						newProfile = extendArrayWithRegex(settings);
 									
 					expect(newProfile).toEqual(testProfile);
 				});
@@ -322,7 +327,7 @@ describe("Profile processing function", function(){
 						settings.processKey = "a"
 						settings.profile = {"a":1, "b":2};
 						
-						var newProfile = processRegexToProfileArrays(settings);
+						var newProfile = extendArrayWithRegex(settings);
 						expect(newProfile[settings.outputKey]).toBeDefined();
 					});
 			
@@ -331,7 +336,7 @@ describe("Profile processing function", function(){
 						settings.processKey = "a"
 						settings.profile = {"a":1, "b":2};
 						
-						var newProfile = processRegexToProfileArrays(settings);
+						var newProfile = extendArrayWithRegex(settings);
 						expect(newProfile[settings.outputKey]).toEqual(jasmine.any(Array));
 					});
 				});
@@ -341,7 +346,7 @@ describe("Profile processing function", function(){
 					settings.profile = {"injectTest" : null, "injectRegex": "a"};
 					settings.processKey = "injectRegex";
 					
-					var newProfile = processRegexToProfileArrays(settings);
+					var newProfile = extendArrayWithRegex(settings);
 					expect(newProfile[settings.outputKey]).toEqual(jasmine.any(Array));
 				});
 			});
@@ -354,7 +359,7 @@ describe("Profile processing function", function(){
 					settings.processKey = [];
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexToProfileArrays(settings);
+						newProfile = extendArrayWithRegex(settings);
 					
 					expect(newProfile).toEqual(testProfile);
 				});
@@ -365,7 +370,7 @@ describe("Profile processing function", function(){
 					settings.processKey = "injectRegex";
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexToProfileArrays(settings);
+						newProfile = extendArrayWithRegex(settings);
 					
 					expect(newProfile).toEqual(testProfile);
 				});
@@ -376,7 +381,7 @@ describe("Profile processing function", function(){
 					settings.processKey = "injectRegex";
 					
 					var testProfile = JSON.parse(JSON.stringify(settings.profile)),
-						newProfile = processRegexToProfileArrays(settings);
+						newProfile = extendArrayWithRegex(settings);
 					
 					expect(newProfile).toEqual(testProfile);
 				});				
@@ -395,7 +400,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 					
-					processRegexToProfileArrays(settings);
+					extendArrayWithRegex(settings);
 
 					expect(window.isArray).toHaveBeenCalled();
 				});
@@ -405,7 +410,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 					
-					processRegexToProfileArrays(settings);
+					extendArrayWithRegex(settings);
 
 					expect(window.isArray).toHaveBeenCalledWith(settings.profile.testKey);
 				});
@@ -420,7 +425,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 
-					processRegexToProfileArrays(settings);
+					extendArrayWithRegex(settings);
 
 					expect(window.returnKeyMatch).toHaveBeenCalled();
 				});	
@@ -430,7 +435,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = /^test/;
 
-					processRegexToProfileArrays(settings);
+					extendArrayWithRegex(settings);
 
 					expect(window.returnKeyMatch).toHaveBeenCalledWith(settings.profile.testKey, settings.data);
 
@@ -441,7 +446,7 @@ describe("Profile processing function", function(){
 					settings.outputKey = "injectString";
 					settings.profile.testKey = [/^test/, "value\d"];
 
-					processRegexToProfileArrays(settings);
+					extendArrayWithRegex(settings);
 
 					expect(window.returnKeyMatch.calls.count()).toBe(2);					
 				});
@@ -456,14 +461,595 @@ describe("Profile processing function", function(){
 
 				spyOn(window, "uniqueMergeArray");
 				
-				processRegexToProfileArrays(settings);
+				extendArrayWithRegex(settings);
 				
 				expect(window.uniqueMergeArray).toHaveBeenCalled();
 			});	
 		});
 	});
 		
-	
+	describe("extendObjectWithRegex", function() {
+		var settings = null;
+
+		beforeEach(function() {
+			settings = {
+				data : {},
+				profile : {},
+				processKey: "testProcess",
+				targetKey: "testTarget",
+				singluarTarget: false
+			};
+		});
+
+		it('is a function', function() {
+			expect(extendObjectWithRegex).toEqual(jasmine.any(Function));
+		});
+
+		describe("returns", function() {
+
+			it('an object', function() {
+				expect(extendObjectWithRegex(settings)).toEqual(jasmine.any(Object));
+			});
+
+			describe('the profile unchanged', function() {
+				var controlProfile = null,
+					_profile = null;
+
+				beforeEach(function() {
+					settings.profile[settings.processKey] = {
+						"k1" : 1
+					};
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					_profile = null
+				});
+
+				it('if the processKey is undefined', function() {
+					settings.processKey = undefined;
+
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the processKey is null', function() {
+					settings.processKey = null;
+
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the processKey is not an string', function() {
+					settings.processKey = {};
+
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the processKey is not an in the profile as a key', function() {
+					settings.processKey = "testKey";
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the processKey is in the profile but has a value that is not a object', function() {
+					settings.profile.testKey = "test";
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					settings.processKey = "testKey";
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the processKey is in the profile but has a value of null', function() {
+					settings.profile.testKey = null;
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					settings.processKey = "testKey";
+
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the targetKey is undefined', function() {
+					settings.targetKey = undefined;
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the targetKey is null', function() {
+					settings.targetKey = null;
+					
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the targetKey is not a string', function() {
+					settings.targetKey = {};
+					
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the targetKey is an empty string', function() {
+					settings.targetKey = "";
+					
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it('if the targetKey is a string containg only white space', function() {
+					settings.targetKey = "   ";
+					
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+
+				it("if there are no values found to add to the profilekey", function() {
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1,
+						"k2" : 2,
+						"k3" : 3
+					};
+
+					spyOn(window,'objectLength').and.returnValue(0);
+					spyOn(window,'returnKeyMatch').and.returnValue([]);
+
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+					
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
 
 
+				it('when settings.singluarTarget is true and the matched key has a value that is not null', function () {
+					settings.singluarTarget = true;
+					settings.profile[settings.targetKey] = {
+						"k1": 4
+					};
+
+					controlProfile = JSON.parse(JSON.stringify(settings.profile));
+				
+					_profile = extendObjectWithRegex(settings);
+
+					expect(_profile).toEqual(controlProfile);
+				});
+			});
+
+			describe('a modified profile', function() {
+				var _profile = {},
+					controlProfile = null;
+
+				beforeEach(function(){
+					_profile = {};
+
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1,
+						"k2" : 2,
+						"k3" : 3
+					};
+					settings.targetKey = "injectedTest";
+					settings.profile[settings.targetKey] = {};
+
+					spyOn(window,'objectLength').and.returnValue(1);
+					spyOn(window,'returnKeyMatch').and.returnValue(["k1"]);
+
+					controlProfile = null;
+				});
+
+				describe('by adding the target as an object', function () {
+					it('when the settings.profile[settings.targetKey] is undefined it adds an object to the profile', function() {
+						settings.profile[settings.targetKey] = undefined;
+
+						_profile = extendObjectWithRegex(settings);
+
+						expect(_profile[settings.targetKey]).toEqual(jasmine.any(Object));
+					});
+
+					it('when the settings.profile[settings.targetKey] is null it adds an object to the profile', function() {
+						settings.profile[settings.targetKey] = null;
+
+						_profile = extendObjectWithRegex(settings);
+
+						expect(_profile[settings.targetKey]).toEqual(jasmine.any(Object));
+						expect(_profile[settings.targetKey]).not.toBe(null);
+					});
+				});
+
+				describe('by modifying the target object', function() {
+					
+					describe('with the new value', function() {
+						it('when settings.singluarTarget is true and the matched key has a value of null', function () {
+							settings.singluarTarget = true;
+							settings.profile[settings.targetKey].k1 = null;
+							settings.profile[settings.processKey] = {
+								"k1" : 1
+							};
+							
+							_profile = extendObjectWithRegex(settings);
+
+							expect(_profile[settings.targetKey]).toEqual(jasmine.objectContaining({
+	      						"k1" : 1
+							}));
+						});
+						
+						it('when settings.singluarTarget is true and the matched key has an undefined value', function () {
+							settings.singluarTarget = true;
+							settings.profile[settings.targetKey].k1 = undefined;
+							settings.profile[settings.processKey] = {
+								"k1" : 1
+							};
+							
+							_profile = extendObjectWithRegex(settings);
+
+							expect(_profile[settings.targetKey]).toEqual(jasmine.objectContaining({
+								"k1" : 1
+							}));
+						});
+
+
+						it('when settings.singluarTarget is false and the matched key has an undefined value', function () {
+							settings.singluarTarget = false;
+							settings.profile[settings.targetKey].k1 = undefined;
+							settings.profile[settings.processKey] = {
+								"k1" : 1
+							};
+							
+							_profile = extendObjectWithRegex(settings);
+
+							expect(_profile[settings.targetKey]).toEqual(jasmine.objectContaining({"k1" : [1]}));
+						});
+
+						it('when settings.singluarTarget is false and the matched key has a value of null', function () {
+							settings.singluarTarget = false;
+							settings.profile[settings.targetKey].k1 = null;
+							settings.profile[settings.processKey] = {
+								"k1" : 1
+							};
+							
+							_profile = extendObjectWithRegex(settings);
+
+							expect(_profile[settings.targetKey]).toEqual(jasmine.objectContaining({
+								"k1" : [1]
+							}));
+						});
+
+						it('when settings.singluarTarget is false and the matched key has a value that is not null', function () {
+							settings.singluarTarget = false;
+							settings.profile[settings.targetKey] = {
+								"k1" : 2
+							};
+							settings.profile[settings.processKey] = {
+								"k1" : 1
+							};
+							
+							_profile = extendObjectWithRegex(settings);
+
+							expect(_profile[settings.targetKey]["k1"]).toEqual(jasmine.any(Array));
+							expect(_profile[settings.targetKey]["k1"]).toContain(1);
+							expect(_profile[settings.targetKey]["k1"]).toContain(2);
+						});
+
+						it('when settings.singluarTarget is false and the matched key has a value that is an array mixed types', function () {
+							
+							var testFunction = function () {
+								return 1;
+							};
+							settings.singluarTarget = false;
+							settings.profile[settings.targetKey] = {
+								"k1" : [2, 'test', testFunction]
+							};
+							settings.profile[settings.processKey] = {
+								"k1" : [4, {}]
+							};
+							
+							_profile = extendObjectWithRegex(settings);
+
+							expect(_profile[settings.targetKey]["k1"]).toEqual(jasmine.any(Array));
+							expect(_profile[settings.targetKey]["k1"]).toContain(2);
+							expect(_profile[settings.targetKey]["k1"]).toContain(4);
+							expect(_profile[settings.targetKey]["k1"]).toContain({});
+							expect(_profile[settings.targetKey]["k1"]).toContain('test');
+							expect(_profile[settings.targetKey]["k1"]).toContain(testFunction);
+						});
+
+					});
+				});
+			});
+		});
+
+		describe('calls', function() {
+			describe('returnKeyMatch', function() {
+				beforeEach(function(){
+					spyOn(window, 'returnKeyMatch').and.returnValue(["k1", "k2", "k3"]);
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1,
+						"k2" : 2,
+						"k3" : 3
+					};
+				});
+
+				it('when the settings.processKey is a string and the string exists in the profile', function() {
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).toHaveBeenCalled();
+				});
+
+				it("once when settings.profile[settings.processKey] has one key", function() {
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1
+					};
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch.calls.count()).toBe(1);
+				});
+
+				it("twice when settings.profile[settings.processKey] has two key", function() {
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1,
+						"k2" : 2
+					};
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch.calls.count()).toBe(2);
+				});
+
+				it("once for each key in settings.profile[settings.processKey]", function() {
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1,
+						"k2" : 2,
+						"k3" : 3
+					};
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch.calls.count()).toBe(3);
+				});
+
+				it("with the paramaters settings.profile[settings.processKey][i] and settings.data", function() {
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1
+					};
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).toHaveBeenCalledWith("k1", settings.data);
+				});
+			});
+
+			describe('objectLength', function() {
+				beforeEach(function(){
+					settings.processKey = "testValue";
+					settings.profile[settings.processKey] = {
+						"k1" : 1,
+						"k2" : 2,
+						"k3" : 3
+					};
+				});
+
+				it('when the settings.processKey is a string and the string exists in the profile', function() {
+					spyOn(window,'objectLength');
+
+					extendObjectWithRegex(settings);
+					expect(window.objectLength).toHaveBeenCalled();
+				});
+			});
+
+			describe('uniqueMergeArray', function() {
+				it('when the settings.processKey is a string and the string exists in the profile', function() {
+					spyOn(window,'uniqueMergeArray');
+
+					settings.singluarTarget = false;
+					settings.profile[settings.targetKey] = {
+						"k1" : 2
+					};
+					settings.profile[settings.processKey] = {
+						"k1" : 1
+					};
+
+					extendObjectWithRegex(settings);
+					expect(window.uniqueMergeArray).toHaveBeenCalled();
+				});
+			});
+		});
+
+		describe('dose not call', function() {
+			describe('returnKeyMatch', function() {
+				beforeEach(function(){
+					spyOn(window, 'returnKeyMatch');
+				});
+
+				it('when the processKey is undefined', function() {
+					settings.processKey = undefined;
+
+					extendObjectWithRegex(settings);
+
+					expect(window.returnKeyMatch).not.toHaveBeenCalled()					
+				});
+
+				it('when the processKey is null', function() {
+					settings.processKey = null;
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is not an string', function() {
+					settings.processKey = {};
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is not an in the profile as a key', function() {
+					settings.processKey = "testKey";
+					
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is in the profile but has a value that is not a object', function() {
+					settings.profile.textKey = "test";
+					settings.processKey = "testKey";
+					
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is in the profile but has a value of null', function() {
+					settings.profile.textKey = null;
+					settings.processKey = "testKey";
+
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).not.toHaveBeenCalled();
+				});
+
+				it('when settings.profile[settings.processKey] has no keys', function() {
+					extendObjectWithRegex(settings);
+					expect(window.returnKeyMatch).not.toHaveBeenCalled();
+				});
+			});
+
+			describe('objectLength', function() {
+				beforeEach(function(){
+					spyOn(window, 'objectLength');
+				});
+
+				it('when the processKey is undefined', function() {
+					settings.processKey = undefined;
+
+					extendObjectWithRegex(settings);
+
+					expect(window.objectLength).not.toHaveBeenCalled()					
+				});
+
+				it('when the processKey is null', function() {
+					settings.processKey = null;
+
+					extendObjectWithRegex(settings);
+					expect(window.objectLength).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is not an string', function() {
+					settings.processKey = {};
+
+					extendObjectWithRegex(settings);
+					expect(window.objectLength).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is not an in the profile as a key', function() {
+					settings.processKey = "testKey";
+					
+					extendObjectWithRegex(settings);
+					expect(window.objectLength).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is in the profile but has a value that is not a object', function() {
+					settings.profile.textKey = "test";
+					settings.processKey = "testKey";
+					
+					extendObjectWithRegex(settings);
+					expect(window.objectLength).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is in the profile but has a value of null', function() {
+					settings.profile.textKey = null;
+					settings.processKey = "testKey";
+
+					extendObjectWithRegex(settings);
+					expect(window.objectLength).not.toHaveBeenCalled();
+				});
+			});
+
+			describe('uniqueMergeArray', function() {
+				beforeEach(function(){
+					spyOn(window, 'uniqueMergeArray');
+				});
+
+				it('when the processKey is undefined', function() {
+					settings.processKey = undefined;
+
+					extendObjectWithRegex(settings);
+
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled()					
+				});
+
+				it('when the processKey is null', function() {
+					settings.processKey = null;
+
+					extendObjectWithRegex(settings);
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is not an string', function() {
+					settings.processKey = {};
+
+					extendObjectWithRegex(settings);
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is not an in the profile as a key', function() {
+					settings.processKey = "testKey";
+					
+					extendObjectWithRegex(settings);
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is in the profile but has a value that is not a object', function() {
+					settings.profile.textKey = "test";
+					settings.processKey = "testKey";
+					
+					extendObjectWithRegex(settings);
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled();
+				});
+
+				it('when the processKey is in the profile but has a value of null', function() {
+					settings.profile.textKey = null;
+					settings.processKey = "testKey";
+
+					extendObjectWithRegex(settings);
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled();
+				});
+			
+
+				it('when settings.singluarTarget is true', function () {
+					settings.singluarTarget = true;
+					settings.profile[settings.targetKey] = {
+						"k1" : 2
+					};
+					settings.profile[settings.processKey] = {
+						"k1" : 1
+					};
+					
+					extendObjectWithRegex(settings);
+
+					expect(window.uniqueMergeArray).not.toHaveBeenCalled();
+				});
+			});
+		});
+	});
 });

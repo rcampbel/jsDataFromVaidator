@@ -1,3 +1,4 @@
+
 function isEmpty (value) {
 	var rtval = false;
 	
@@ -99,13 +100,18 @@ function uniqueMergeArray () {
 					returnValue.push(arguments[i][y]);
 				}
 			}
+		} else {
+			if (!_values[arguments[i]]) {
+				_values[arguments[i]] = true;
+				returnValue.push(arguments[i]);
+			}
 		}
 	}
 	
 	return returnValue;
 }
 
-function processRegexToProfileArrays (settings) {
+function extendArrayWithRegex (settings) {
 	var profile = settings.profile,
 		matchedKeys = [],
 		processValues = [],
@@ -137,21 +143,83 @@ function processRegexToProfileArrays (settings) {
 	return profile;
 }
 
+function extendObjectWithRegex (settings) {
+	var profile = settings.profile
+		processKey = settings.processKey,
+		targetKey = settings.targetKey,
+		objToProcess = {},
+		objToProcessKey = null,
+		objToProcessValue = null,
+		matchedFelidNames = [],
+		singluarTarget = settings.singluarTarget || false,
+		replaceTarget = settings.replaceTarget || false,
+		valueMap = {},
+		index = 0;
+
+	if (typeof processKey === "string" && 
+		typeof profile[processKey] === "object" && 
+		profile[processKey] !== null &&
+		typeof targetKey === "string" &&
+		targetKey.trim().length > 0
+	) {
+		objToProcess = profile[processKey];
+		for (objToProcessKey in objToProcess) {
+			if (objToProcess.hasOwnProperty(objToProcessKey)){
+				objToProcessValue = objToProcess[objToProcessKey];
+				matchedFelidNames = returnKeyMatch(objToProcessKey, settings.data);
+				for (index = 0; index < matchedFelidNames.length; index++) {
+					var fieldName = matchedFelidNames[index],
+						valArray = valueMap[fieldName] || [];
+					
+					valArray = uniqueMergeArray(valArray, objToProcessValue);
+					valueMap[fieldName] = valArray;
+				}
+			}
+		}
+
+		if (objectLength(valueMap) > 0){
+			var targetProfileObject = profile[settings.targetKey] || {};
+
+			for (objToProcessKey in valueMap) {
+				if (valueMap.hasOwnProperty(objToProcessKey)) {
+					if (typeof targetProfileObject[objToProcessKey] === "undefined" || targetProfileObject[objToProcessKey] === null ) {
+						if (singluarTarget) {
+							targetProfileObject[objToProcessKey] = valueMap[objToProcessKey].pop();
+						} else {
+							targetProfileObject[objToProcessKey] = valueMap[objToProcessKey];
+						}
+					} else {
+						if (!singluarTarget) {
+							targetProfileObject[objToProcessKey] = uniqueMergeArray(targetProfileObject[objToProcessKey], valueMap[objToProcessKey]);
+						}
+					}
+				}		
+			}
+			profile[settings.targetKey] = targetProfileObject;
+		}
+
+	}
+
+	return profile;
+}
+
 /*
 {
-	required : [
-		"field4",
-		"field5",
-		"field6",
-		"field7"
-	],
-	<processRegexOption> <== required_regexp : <regex>||[<regex>,<regex>, ...],
-	optional : [
-		"field1",
-		"field2",
-		"field3"
-	],
-	<processRegexOption> <== optional_regexp : <regex>||[<regex>,<regex>, ...],
+
+//	required : [
+//		"field4",
+//		"field5",
+//		"field6",
+//		"field7"
+//	],
+//	required_regexp : <regex>||[<regex>,<regex>, ...],
+//	optional : [
+//		"field1",
+//		"field2",
+//		"field3"
+//	],
+//	optional_regexp : <regex>||[<regex>,<regex>, ...],
+
 	dependencies : {
 		field1 : [<field_name>, ...],
 		field2 : {
@@ -162,57 +230,61 @@ function processRegexToProfileArrays (settings) {
 	dependency_groups : {
 		group_name : [<field_name>, ...]
 	},
-	defaults : {
-		field1 : <string>,
-		field2 : <string>
-	},
-	defaults_regexp_map : {
-		<regex> : <string>
-	},
+
+//	defaults : {
+//		field1 : <string>,
+//		field2 : <string>
+//	},
+//	defaults_regexp_map : {
+//		<regex> : <string>
+//	},
+
 	filters : [<string>|<function>],
-	field_filters : {
-		field1 : <string>|<function>
-	},
-	field_filter_regexp_map : {
-		<regex> : <string>|<function>
-	},
-	constraint_methods : {
-		field1 : <function>,
-		field2 : <regex>,
-		field3 : {
-			constraint_method : "<string>",
-			params : [<value1>, <value2>],
-			name : <string>
-		},
-		field4 : <string>,
-		field5 : [
-			<function>,
-			<regex>,
-			{
-				constraint_method : "<string>",
-				params : [<value1>, <value2>],
-				name : <string>
-			},
-			<named constraint>
-		],
-		// Constraint not tied to a field
-		name1 : <function>
-		name2 : {
-			constraint_method : "<string>",
-			params : [<value1>, <value2>],
-			name : <string>
-		},
-	}
-	constraint_method_regexp_map : {
-		<regex> : <function>,
-		<regex> : <regex>,
-		<regex> : {
-			constraint_method : "<string>",
-			params : [<value1>, <value2>],
-			name : <string>
-		},
-		<regex> : <string>
-	},
+	
+//	field_filters : {
+//		field1 : [<string>|<function>]
+//	},
+//	field_filter_regexp_map : {
+//		<regex> : <string>|<function>
+//	},
+	
+//	constraint_methods : {
+//		field1 : <function>,
+//		field2 : <regex>,
+//		field3 : {
+//			constraint_method : "<string>",
+//			params : [<value1>, <value2>],
+//			name : <string>
+//		},
+//		field4 : <string>,
+//		field5 : [
+//			<function>,
+//			<regex>,
+//			{
+//				constraint_method : "<string>",
+//				params : [<value1>, <value2>],
+//				name : <string>
+//			},
+//			<named constraint>
+//		],
+//		// Constraint not tied to a field
+//		name1 : <function>
+//		name2 : {
+//			constraint_method : "<string>",
+//			params : [<value1>, <value2>],
+//			name : <string>
+//		},
+//	}
+//	constraint_method_regexp_map : {
+//		<regex> : <function>,
+//		<regex> : <regex>,
+//		<regex> : {
+//			constraint_method : "<string>",
+//			params : [<value1>, <value2>],
+//			name : <string>
+//		},
+//		<regex> : <string>
+//	},
 	untaint_all_constraints : <true|false>,
 	untaint_constraint_fields : {
 		field1 : <true|false>
